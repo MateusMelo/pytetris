@@ -93,19 +93,36 @@ class Grid:
         for cel in next_row_cels:
             if cel == 1:
                 self.current_piece_collided = True
-    
-    # def update(self, grid):
-    #     for row in range(len(grid)):
-    #         for col in range(len(grid[row])):
-    #             x = screen.get_width() / self.cols
-    #             y = screen.get_height() / self.rows
-    #             w = col * y
-    #             h = row * x
-    #             if (grid[row][col] == 1):
-    #                 pygame.draw.rect(screen, pygame.Color("Red"), [w, h, x, y], 1)
-    #             else:
-    #                 pygame.draw.rect(screen, pygame.Color("Green"), [w, h, x, y], 1)
 
+    def move_current_piece_left(self):
+        if (self.current_piece_collided is not True):
+            self.clear_last_piece_position()
+            for row in range(len(self.current_piece)):
+                for col in range(len(self.current_piece[row])):
+                    self.current_piece[row][col] -= 1
+
+        for row in range(len(self.grid)):
+                for col in range(len(self.grid[row])):
+                    if (row < len(self.current_piece)):
+                        if (col < len(self.current_piece[row])):
+                            if (self.grid[row][self.current_piece[row][col]] != 1):
+                                self.grid[row][self.current_piece[row][col]] = 1
+
+
+    def move_current_piece_right(self):
+        if (self.current_piece_collided is not True):
+            self.clear_last_piece_position()
+            for row in range(len(self.current_piece)):
+                for col in range(len(self.current_piece[row])):
+                    self.current_piece[row][col] += 1
+
+        for row in range(len(self.grid)):
+                for col in range(len(self.grid[row])):
+                    if (row < len(self.current_piece)):
+                        if (col < len(self.current_piece[row])):
+                            if (self.grid[row][self.current_piece[row][col]] != 1):
+                                self.grid[row][self.current_piece[row][col]] = 1
+    
 grid = Grid()
 middle = floor(len(grid.grid) / 2)
 
@@ -181,6 +198,11 @@ pygame.event.post(SpawnPiece)
 
 while True:
     for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                grid.move_current_piece_left()
+            if event.key == pygame.K_RIGHT:
+                grid.move_current_piece_right()
         if event.type == SPAWN_PIECE:
             grid.set_current_piece(piece.give())
         if event.type == DROP_PIECE:
