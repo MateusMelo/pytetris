@@ -27,6 +27,7 @@ class Grid:
         self.grid = [[0] * self.rows for _ in range(self.cols)]
         self.current_piece = []
         self.current_piece_collided = False
+        self.current_piece_collided_left = False
 
     def draw(self):
         for row in range(len(self.grid)):
@@ -63,6 +64,13 @@ class Grid:
                 piece_next_row.append(self.grid[len(self.current_piece)][col])
         return piece_next_row
     
+    def get_previous_column_state(self):
+        piece_left_column = []
+        for row in range(len(self.current_piece)):
+            if (has_index(self.current_piece, row)):
+                piece_left_column.append(self.current_piece[row][0])
+        return piece_left_column
+    
     def clear_last_piece_position(self):
         for row in range(len(self.grid)):
             for col in range(len(self.grid[row])):
@@ -82,46 +90,43 @@ class Grid:
             pygame.event.post(SpawnPiece)
             self.current_piece_collided = False
 
-        for row in range(len(self.grid)):
-                for col in range(len(self.grid[row])):
-                    if (row < len(self.current_piece)):
-                        if (col < len(self.current_piece[row])):
-                            if (self.grid[row][self.current_piece[row][col]] != 1):
-                                self.grid[row][self.current_piece[row][col]] = 1
+        self.draw_current_piece()
         
         next_row_cels = self.get_next_row_state()
         for cel in next_row_cels:
             if cel == 1:
                 self.current_piece_collided = True
 
+    def draw_current_piece(self):
+        for row in range(len(self.grid)):
+                        for col in range(len(self.grid[row])):
+                            if (row < len(self.current_piece)):
+                                if (col < len(self.current_piece[row])):
+                                    self.grid[row][self.current_piece[row][col]] = 1
+
     def move_current_piece_left(self):
         if (self.current_piece_collided is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
                 for col in range(len(self.current_piece[row])):
-                    self.current_piece[row][col] -= 1
+                    if self.current_piece[row][col] > 0 and self.current_piece[row][col] < len(self.grid) and self.current_piece_collided_left is not True:
+                        self.current_piece[row][col] -= 1
+        
+        self.draw_current_piece()
 
-        for row in range(len(self.grid)):
-                for col in range(len(self.grid[row])):
-                    if (row < len(self.current_piece)):
-                        if (col < len(self.current_piece[row])):
-                            if (self.grid[row][self.current_piece[row][col]] != 1):
-                                self.grid[row][self.current_piece[row][col]] = 1
-
-
+        for cel in self.get_previous_column_state():
+            if cel == 0:
+                self.current_piece_collided_left = True
+        
     def move_current_piece_right(self):
+        self.current_piece_collided_left = False
         if (self.current_piece_collided is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
                 for col in range(len(self.current_piece[row])):
                     self.current_piece[row][col] += 1
 
-        for row in range(len(self.grid)):
-                for col in range(len(self.grid[row])):
-                    if (row < len(self.current_piece)):
-                        if (col < len(self.current_piece[row])):
-                            if (self.grid[row][self.current_piece[row][col]] != 1):
-                                self.grid[row][self.current_piece[row][col]] = 1
+        self.draw_current_piece()
     
 grid = Grid()
 middle = floor(len(grid.grid) / 2)
@@ -133,15 +138,6 @@ class Piece:
 
     def spawn(self):
         return self.current_piece
-        # cols = 9
-        # rows = 9
-        # grid_state = [[0] * rows for _ in range(cols)]
-        # for row in range(len(grid_state)):
-        #         for col in range(len(grid_state[row])):
-        #             if (row < len(self.current_piece)):
-        #                 if (col < len(self.current_piece[row])):
-        #                     grid_state[row][self.current_piece[row][col]] = 1
-        return grid_state
 
     def give(self):
         return self.current_piece
