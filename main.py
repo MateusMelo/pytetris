@@ -28,6 +28,7 @@ class Grid:
         self.current_piece = []
         self.current_piece_collided = False
         self.current_piece_collided_left = False
+        self.current_piece_collided_right = False
 
     def draw(self):
         for row in range(len(self.grid)):
@@ -71,6 +72,13 @@ class Grid:
                 piece_left_column.append(self.current_piece[row][0])
         return piece_left_column
     
+    def get_next_column_state(self):
+        piece_right_column = []
+        for row in range(len(self.current_piece)):
+            if (has_index(self.current_piece, row)):
+                piece_right_column.append(self.current_piece[row][len(self.current_piece[row])-1])
+        return piece_right_column
+    
     def clear_last_piece_position(self):
         for row in range(len(self.grid)):
             for col in range(len(self.grid[row])):
@@ -105,6 +113,8 @@ class Grid:
                                     self.grid[row][self.current_piece[row][col]] = 1
 
     def move_current_piece_left(self):
+        self.current_piece_collided_right = False
+
         if (self.current_piece_collided is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
@@ -120,13 +130,19 @@ class Grid:
         
     def move_current_piece_right(self):
         self.current_piece_collided_left = False
+
         if (self.current_piece_collided is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
                 for col in range(len(self.current_piece[row])):
-                    self.current_piece[row][col] += 1
-
+                    if self.current_piece[row][col] < len(self.grid[row]) and self.current_piece_collided_right is not True:
+                        self.current_piece[row][col] += 1
+        
         self.draw_current_piece()
+
+        for cel in self.get_next_column_state():
+            if cel == len(self.grid)-1:
+                self.current_piece_collided_right = True
     
 grid = Grid()
 middle = floor(len(grid.grid) / 2)
