@@ -150,11 +150,7 @@ middle = floor(len(grid.grid) / 2)
 class Piece:
     def __init__(self):
         self.current_piece = [[middle-1, middle], [middle-1, middle]]
-        self.current_row = 0
-
-    def spawn(self):
-        return self.current_piece
-
+    
     def give(self):
         return self.current_piece
         
@@ -167,9 +163,7 @@ class Piece:
 
     def spin():
         pass # Spin the piece in clockwise
-                    
 
-piece = Piece()
 
 # seq = [i for i in range(len(grid.grid))]
 # col = choice(seq)
@@ -216,6 +210,7 @@ while True:
             if event.key == pygame.K_RIGHT:
                 grid.move_current_piece_right()
         if event.type == SPAWN_PIECE:
+            piece = Piece()
             grid.set_current_piece(piece.give())
         if event.type == DROP_PIECE:
             grid.drop_current_piece()
