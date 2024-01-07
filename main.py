@@ -26,7 +26,7 @@ class Grid:
         self.rows = 9
         self.grid = [[0] * self.rows for _ in range(self.cols)]
         self.current_piece = []
-        self.current_piece_collided = False
+        self.current_piece_collided_down = False
         self.current_piece_collided_left = False
         self.current_piece_collided_right = False
 
@@ -58,21 +58,28 @@ class Grid:
                         return self.grid[row][self.current_piece[row][col]]
         return []
     
-    def get_next_row_state(self):
+    def get_next_row_value(self):
         piece_next_row = []
         for col in self.current_piece[len(self.current_piece)-1]:
             if (has_index(self.grid, len(self.current_piece))):
                 piece_next_row.append(self.grid[len(self.current_piece)][col])
         return piece_next_row
     
-    def get_previous_column_state(self):
+    def get_previous_column_index(self):
         piece_left_column = []
         for row in range(len(self.current_piece)):
             if (has_index(self.current_piece, row)):
                 piece_left_column.append(self.current_piece[row][0])
         return piece_left_column
     
-    def get_next_column_state(self):
+    def get_previous_column_value(self):
+        piece_left_column = []
+        for row in range(len(self.current_piece)):
+            if (has_index(self.current_piece, row)):
+                piece_left_column.append(self.grid[row][self.current_piece[row][0]-1])
+        return piece_left_column
+    
+    def get_next_column_index(self):
         piece_right_column = []
         for row in range(len(self.current_piece)):
             if (has_index(self.current_piece, row)):
@@ -90,20 +97,20 @@ class Grid:
         self.current_piece = [[]] + self.current_piece
 
     def drop_current_piece(self):
-        if (self.current_piece_collided is not True):
+        if (self.current_piece_collided_down is not True):
             self.clear_last_piece_position()
             self.advance_one_column()
 
-        if (len(self.current_piece) >= self.cols or self.current_piece_collided is True):
+        if (len(self.current_piece) >= self.cols or self.current_piece_collided_down is True):
             pygame.event.post(SpawnPiece)
-            self.current_piece_collided = False
+            self.current_piece_collided_down = False
 
         self.draw_current_piece()
         
-        next_row_cels = self.get_next_row_state()
+        next_row_cels = self.get_next_row_value()
         for cel in next_row_cels:
             if cel == 1:
-                self.current_piece_collided = True
+                self.current_piece_collided_down = True
 
     def draw_current_piece(self):
         for row in range(len(self.grid)):
@@ -115,7 +122,11 @@ class Grid:
     def move_current_piece_left(self):
         self.current_piece_collided_right = False
 
-        if (self.current_piece_collided is not True):
+        for cel in self.get_previous_column_value():
+            if cel == 1:
+                self.current_piece_collided_left = True
+
+        if (self.current_piece_collided_down is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
                 for col in range(len(self.current_piece[row])):
@@ -124,14 +135,14 @@ class Grid:
         
         self.draw_current_piece()
 
-        for cel in self.get_previous_column_state():
+        for cel in self.get_previous_column_index():
             if cel == 0:
                 self.current_piece_collided_left = True
         
     def move_current_piece_right(self):
         self.current_piece_collided_left = False
 
-        if (self.current_piece_collided is not True):
+        if (self.current_piece_collided_down is not True):
             self.clear_last_piece_position()
             for row in range(len(self.current_piece)):
                 for col in range(len(self.current_piece[row])):
@@ -140,7 +151,7 @@ class Grid:
         
         self.draw_current_piece()
 
-        for cel in self.get_next_column_state():
+        for cel in self.get_next_column_index():
             if cel == len(self.grid)-1:
                 self.current_piece_collided_right = True
     
