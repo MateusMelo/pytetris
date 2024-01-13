@@ -1,6 +1,6 @@
 # Example file showing a circle moving on screen
 import pygame
-# from random import choice
+from random import choice
 from math import floor
 
 pygame.init()
@@ -11,7 +11,22 @@ DROP_PIECE = pygame.USEREVENT + 1
 SPAWN_PIECE = pygame.USEREVENT + 2
 SpawnPiece = pygame.event.Event(SPAWN_PIECE, attr1='SpawnPiece')
 
-pygame.time.set_timer(DROP_PIECE, 1000)
+MIN_SPEED = .9
+MAX_SPEED = .1
+velocity_y = MIN_SPEED
+
+def increase_speed():
+    global velocity_y
+    velocity_y -= .1
+    if (velocity_y > MAX_SPEED):
+        pygame.time.set_timer(DROP_PIECE, int(1000 * velocity_y))
+
+def reset_speed():
+    global velocity_y
+    velocity_y = MIN_SPEED
+    pygame.time.set_timer(DROP_PIECE, int(1000 * velocity_y))
+
+increase_speed()
 
 def has_index(l, i):
     try:
@@ -155,15 +170,26 @@ class Grid:
             if cel == len(self.grid)-1:
                 self.current_piece_collided_right = True
     
+    def move_current_piece_down(self):
+        self.drop_current_piece()
+
 grid = Grid()
 middle = floor(len(grid.grid) / 2)
 
 class Piece:
     def __init__(self):
-        self.current_piece = [[middle-1, middle], [middle-1, middle]]
+        self.pieces = [
+            [[middle-2, middle-1, middle, middle+1]],
+            [[middle], [middle, middle-1, middle+1]],
+            [[middle, middle+1], [middle, middle-1]],
+            [[middle-1, middle], [middle, middle+1]],
+            [[middle+1], [middle-1, middle, middle+1]],
+            [[middle-1, middle], [middle-1, middle]],
+        ]
+        self.seq = [i for i in range(len(self.pieces))]
     
     def give(self):
-        return self.current_piece
+        return self.pieces[choice(self.seq)]
         
     def move_left():
         pass # Move piece one position to left
@@ -174,11 +200,6 @@ class Piece:
 
     def spin():
         pass # Spin the piece in clockwise
-
-
-# seq = [i for i in range(len(grid.grid))]
-# col = choice(seq)
-# row = choice(seq)
 
 #
 #                   # # # #
@@ -213,24 +234,37 @@ grid.draw()
 
 pygame.event.post(SpawnPiece)
 
+# pygame.key.set_repeat(1000, 1000)
+
+k_down_state = False
+
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 grid.move_current_piece_left()
-            if event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT:
                 grid.move_current_piece_right()
-        if event.type == SPAWN_PIECE:
+            elif event.key == pygame.K_DOWN:
+                k_down_state = True
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_DOWN:
+                reset_speed()
+                k_down_state = False
+        elif event.type == SPAWN_PIECE:
             piece = Piece()
             grid.set_current_piece(piece.give())
-        if event.type == DROP_PIECE:
+        elif event.type == DROP_PIECE:
             grid.drop_current_piece()
-        if event.type == pygame.QUIT:
-            pygame.quit()            
+
+    if k_down_state:
+        increase_speed()
 
     screen.fill((0, 0, 0))
 
     grid.draw()
 
     pygame.display.update()
-    clock.tick(120)
+    clock.tick(60)
