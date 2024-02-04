@@ -190,16 +190,6 @@ class Piece:
     
     def give(self):
         return self.pieces[choice(self.seq)]
-        
-    def move_left():
-        pass # Move piece one position to left
-    def move_right():
-        pass # Move piece one position to right
-    def move_down(self):
-        pass 
-
-    def spin():
-        pass # Spin the piece in clockwise
 
 #
 #                   # # # #
